@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.5.16 <0.9.0;
+pragma solidity 0.5.16;
 
 contract SupplyChain {
 
@@ -125,12 +124,12 @@ contract SupplyChain {
   //    - check the value after the function is called to make 
   //      sure the buyer is refunded any excess ether sent. 
   // 6. call the event associated with this function!
-  function buyItem(uint sku) public payable forSale(sku) paidEnough(msg.value) checkValue(sku){
-    items[skuCount].seller.transfer(msg.value);
-    items[skuCount].buyer = msg.sender;
-    items[skuCount].state = State.Sold;
+  function buyItem(uint _sku) public payable forSale(_sku) paidEnough(msg.value) checkValue(_sku){
+    items[_sku].seller.transfer(msg.value);
+    items[_sku].buyer = msg.sender;
+    items[_sku].state = State.Sold;
 
-    emit LogSold(items[skuCount].sku);
+    emit LogSold(_sku);
   }
 
   // 1. Add modifiers to check:
@@ -138,9 +137,9 @@ contract SupplyChain {
   //    - the person calling this function is the seller. 
   // 2. Change the state of the item to shipped. 
   // 3. call the event associated with this function!
-  function shipItem(uint sku) public sold(sku) verifyCaller(items[sku].seller){
-    items[sku].state = State.Shipped;
-    emit LogShipped(sku);
+  function shipItem(uint _sku) public sold(_sku) verifyCaller(items[_sku].seller){
+    items[_sku].state = State.Shipped;
+    emit LogShipped(_sku);
   }
 
   // 1. Add modifiers to check 
@@ -148,9 +147,9 @@ contract SupplyChain {
   //    - the person calling this function is the buyer. 
   // 2. Change the state of the item to received. 
   // 3. Call the event associated with this function!
-  function receiveItem(uint sku) public shipped(sku) verifyCaller(items[sku].buyer){
-    items[sku].state = State.Received;
-    emit LogReceived(sku);
+  function receiveItem(uint _sku) public shipped(_sku) verifyCaller(items[_sku].buyer){
+    items[_sku].state = State.Received;
+    emit LogReceived(_sku);
   }
 
   // Uncomment the following code block. it is needed to run tests
