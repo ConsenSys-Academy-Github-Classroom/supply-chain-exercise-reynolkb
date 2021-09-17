@@ -120,3 +120,6 @@ struct` tests and proceed.
     <details><summary>:book:</summary>
     use case: Whenever an item is received, the contract should emit a "LogReceived" event
     </details>
+
+## Screenshot of passing tests
+![](passing-tests.png)
