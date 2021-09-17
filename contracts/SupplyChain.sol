@@ -7,7 +7,7 @@ contract SupplyChain {
   // <skuCount>
   uint public skuCount;
   // <items mapping>
-  mapping (uint => Item) items;
+  mapping (uint => Item) public items;
   // <enum State: ForSale, Sold, Shipped, Received>
   enum State {ForSale, Sold, Shipped, Received}
   // <struct Item: name, sku, price, state, seller, and buyer>
@@ -47,6 +47,7 @@ contract SupplyChain {
     _;
   }
 
+  // pass in price of item
   modifier paidEnough(uint _price) { 
     require(msg.value >= _price); 
     _;
@@ -57,7 +58,6 @@ contract SupplyChain {
     _;
     uint _price = items[_sku].price;
     uint amountToRefund = msg.value - _price;
-    items[_sku].buyer.transfer(amountToRefund);
   }
 
   // For each of the following modifiers, use what you learned about modifiers
@@ -124,12 +124,14 @@ contract SupplyChain {
   //    - check the value after the function is called to make 
   //      sure the buyer is refunded any excess ether sent. 
   // 6. call the event associated with this function!
-  function buyItem(uint _sku) public payable forSale(_sku) paidEnough(msg.value) checkValue(_sku){
-    items[_sku].seller.transfer(msg.value);
-    items[_sku].buyer = msg.sender;
-    items[_sku].state = State.Sold;
+  function buyItem(uint sku) public payable forSale(sku) paidEnough(items[sku].price) checkValue(sku){
+    // buyer offers 50 wei, but price is 20 wei.
+    // seller gets the item plus the extra amount which is 50 wei - 20 wei = 30 wei
+    items[sku].seller.transfer(msg.value - items[sku].price);
+    items[sku].buyer = msg.sender;
+    items[sku].state = State.Sold;
 
-    emit LogSold(_sku);
+    emit LogSold(items[sku].sku);
   }
 
   // 1. Add modifiers to check:
@@ -137,9 +139,9 @@ contract SupplyChain {
   //    - the person calling this function is the seller. 
   // 2. Change the state of the item to shipped. 
   // 3. call the event associated with this function!
-  function shipItem(uint _sku) public sold(_sku) verifyCaller(items[_sku].seller){
-    items[_sku].state = State.Shipped;
-    emit LogShipped(_sku);
+  function shipItem(uint sku) public sold(sku) verifyCaller(items[sku].seller){
+    items[sku].state = State.Shipped;
+    emit LogShipped(sku);
   }
 
   // 1. Add modifiers to check 
@@ -147,9 +149,9 @@ contract SupplyChain {
   //    - the person calling this function is the buyer. 
   // 2. Change the state of the item to received. 
   // 3. Call the event associated with this function!
-  function receiveItem(uint _sku) public shipped(_sku) verifyCaller(items[_sku].buyer){
-    items[_sku].state = State.Received;
-    emit LogReceived(_sku);
+  function receiveItem(uint sku) public shipped(sku) verifyCaller(items[sku].buyer){
+    items[sku].state = State.Received;
+    emit LogReceived(sku);
   }
 
   // Uncomment the following code block. it is needed to run tests
